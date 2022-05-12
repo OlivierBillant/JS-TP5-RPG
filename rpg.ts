@@ -64,18 +64,16 @@ class Joueur {
     attack(monstre: Monstre) {
         let de = new De(6);
         let lanceJoueur: number = de.lanceDe();
-        console.log("Le joueur fait : " + lanceJoueur);
-
+        // console.log("Le joueur fait : " + lanceJoueur);
         let lanceMonstre: number = de.lanceDe();
-        console.log("Le monstre fait : " + lanceMonstre);
+        // console.log("Le monstre fait : " + lanceMonstre);
 
         if (lanceJoueur >= lanceMonstre) {
             this.increaseScore(monstre.getValeur());
-            console.log("Le monstre est vaincu")
-        } else {
             monstre.isDead();
-            //subir degats pour plus d evolutivite
-        }
+            console.log("Le monstre est vaincu")
+        } else{console.log("Le monstre resiste...");
+        }           
     }
 
     scoring(monstre){
@@ -107,10 +105,9 @@ abstract class Monstre {
     attack(joueur: Joueur) {
         let de = new De(6);
         let lanceJoueur: number = de.lanceDe();
-        console.log("Le joueur fait : " + lanceJoueur);
-
+        // console.log("Le joueur fait : " + lanceJoueur);
         let lanceMonstre: number = de.lanceDe();
-        console.log("Le monstre fait : " + lanceMonstre);
+        // console.log("Le monstre fait : " + lanceMonstre);
 
         if (lanceJoueur < lanceMonstre) {
             joueur.subitDegatsNormaux();
@@ -123,6 +120,7 @@ class MonstreFacile extends Monstre {
         super(valeur);
     }
 }
+
 class MonstreDifficle extends Monstre {
     constructor(valeur: number) {
         super(valeur);
@@ -171,14 +169,16 @@ console.log(player1.getHp());
 
 do {
     let monstre = rencontreAleatoire();
-    // let monstre = new MonstreFacile(1);
-    
+    console.log("Le joueur affronte un nouveau "+monstre.constructor["name"]);
+    do{
+        
         player1.attack(monstre);
-        console.log("Etat du joueur : " + player1.getHp() + " " + player1.getScore());
         if(monstre.isAlive()){ 
             monstre.attack(player1);
-            }
-        player1.scoring(monstre);
+            console.log("Etat du joueur : " + player1.getHp() + " " + player1.getScore());
+        }else{
+            player1.scoring(monstre);}
+        }while(monstre.isAlive())
 } while (player1.isAlive());
 
 console.log("Le joueur est mort, son score est de : " + player1.getScore()
