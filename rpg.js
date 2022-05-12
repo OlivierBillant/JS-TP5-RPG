@@ -149,12 +149,10 @@ var MonstreDifficle = /** @class */ (function (_super) {
 function rencontreAleatoire() {
     var de = new De(2);
     if (de.lanceDe() == 1) {
-        var slime = new MonstreFacile(1);
-        return slime;
+        return new MonstreFacile(1);
     }
     else {
-        var orc = new MonstreDifficle(2);
-        return orc;
+        return new MonstreDifficle(2);
     }
 }
 var De = /** @class */ (function () {
@@ -180,7 +178,7 @@ do {
         else {
             player1.scoring(monstre);
         }
-    } while (monstre.isAlive());
+    } while (monstre.isAlive() && player1.isAlive());
 } while (player1.isAlive());
 console.log("Le joueur est mort, son score est de : " + player1.getScore()
     + " il a tué " + player1.getKcFacile() + " monstres faciles et " + player1.getKcDifficile() + " monstres difficiles");

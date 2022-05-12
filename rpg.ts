@@ -143,11 +143,9 @@ class MonstreDifficle extends Monstre {
 function rencontreAleatoire(): Monstre {
     let de = new De(2);
     if (de.lanceDe() == 1) {
-        let slime = new MonstreFacile(1);
-        return slime
+        return new MonstreFacile(1);
     } else {
-        let orc = new MonstreDifficle(2);
-        return orc;
+        return new MonstreDifficle(2);
     }
 }
 
@@ -178,7 +176,7 @@ do {
             console.log("Etat du joueur : " + player1.getHp() + " " + player1.getScore());
         }else{
             player1.scoring(monstre);}
-        }while(monstre.isAlive())
+        }while(monstre.isAlive() && player1.isAlive())
 } while (player1.isAlive());
 
 console.log("Le joueur est mort, son score est de : " + player1.getScore()
