@@ -17,21 +17,51 @@ var Joueur = /** @class */ (function () {
     function Joueur() {
         this.hp = 150;
         this.score = 0;
+        this.kcFacile = 0;
+        this.kcFDifficile = 0;
     }
     Joueur.prototype.getHp = function () {
         return this.hp;
     };
-    Joueur.prototype.setHp = function (degats) {
-        this.hp = this.hp - degats;
+    Joueur.prototype.esquive = function () {
+        var de = new De(6);
+        var lanceBouclier = de.lanceDe();
+        console.log("Le joueur tente une esquive");
+        if (lanceBouclier <= 2) {
+            console.log("Le joueur esquive l'attaque !");
+            return true;
+        }
+        else {
+            console.log("Le joueur s'en prend plein la tête !");
+            return false;
+        }
+    };
+    Joueur.prototype.subitDegatsNormaux = function () {
+        var degats = 10;
+        if (!this.esquive()) {
+            this.hp = this.hp - degats;
+            // condition positivite
+        }
+    };
+    Joueur.prototype.subitDegatsMagiques = function () {
+        var degats = 10;
+        var multiplicateurMagique = 5;
+        this.hp = this.hp - degats * multiplicateurMagique;
     };
     Joueur.prototype.getScore = function () {
         return this.score;
+    };
+    Joueur.prototype.getKcFacile = function () {
+        return this.kcFacile;
+    };
+    Joueur.prototype.getKcDifficile = function () {
+        return this.kcFDifficile;
     };
     Joueur.prototype.increaseScore = function (valeurMonstre) {
         this.score += valeurMonstre;
     };
     Joueur.prototype.isAlive = function () {
-        if (this.getHp() >= 0) {
+        if (this.getHp() > 0) {
             return true;
         }
         else {
@@ -50,18 +80,15 @@ var Joueur = /** @class */ (function () {
         }
         else {
             monstre.isDead();
+            //subir degats pour plus d evolutivite
         }
     };
-    Joueur.prototype.esquive = function () {
-        var de = new De(6);
-        var lanceBouclier = de.lanceDe();
-        if (lanceBouclier <= 2) {
-            console.log("Le joueur esquive l'attaque !");
-            return true;
+    Joueur.prototype.scoring = function (monstre) {
+        if (monstre.constructor["name"] == "MonstreFacile") {
+            this.kcFacile++;
         }
         else {
-            console.log("Le joueur s'en prend plein la tête !");
-            return false;
+            this.kcFDifficile++;
         }
     };
     return Joueur;
@@ -80,6 +107,16 @@ var Monstre = /** @class */ (function () {
     Monstre.prototype.isAlive = function () {
         return this.status;
     };
+    Monstre.prototype.attack = function (joueur) {
+        var de = new De(6);
+        var lanceJoueur = de.lanceDe();
+        console.log("Le joueur fait : " + lanceJoueur);
+        var lanceMonstre = de.lanceDe();
+        console.log("Le monstre fait : " + lanceMonstre);
+        if (lanceJoueur < lanceMonstre) {
+            joueur.subitDegatsNormaux();
+        }
+    };
     return Monstre;
 }());
 var MonstreFacile = /** @class */ (function (_super) {
@@ -87,19 +124,6 @@ var MonstreFacile = /** @class */ (function (_super) {
     function MonstreFacile(valeur) {
         return _super.call(this, valeur) || this;
     }
-    MonstreFacile.prototype.attack = function (joueur) {
-        var de = new De(6);
-        var lanceJoueur = de.lanceDe();
-        console.log("Le joueur fait : " + lanceJoueur);
-        var lanceMonstre = de.lanceDe();
-        console.log("Le monstre fait : " + lanceMonstre);
-        if (lanceJoueur <= lanceMonstre) {
-            console.log("Le joueur tente une esquive");
-            if (!joueur.esquive()) {
-                joueur.setHp(10);
-            }
-        }
-    };
     return MonstreFacile;
 }(Monstre));
 var MonstreDifficle = /** @class */ (function (_super) {
@@ -108,22 +132,16 @@ var MonstreDifficle = /** @class */ (function (_super) {
         return _super.call(this, valeur) || this;
     }
     MonstreDifficle.prototype.attack = function (joueur) {
-        var de = new De(6);
-        var lanceJoueur = de.lanceDe();
-        console.log("Le joueur fait : " + lanceJoueur);
-        var lanceMonstre = de.lanceDe();
-        console.log("Le monstre fait : " + lanceMonstre);
-        if (lanceJoueur <= lanceMonstre) {
-            console.log("Le joueur tente une esquive");
-            if (!joueur.esquive()) {
-                joueur.setHp(10);
-            }
-        }
+        _super.prototype.attack.call(this, joueur);
         console.log("Le monstre tente de lancer un sort");
+        var de = new De(6);
         var lanceMagique = de.lanceDe();
         if (lanceMagique == 6) {
             console.log("LE SORT REUSSI !!!");
-            joueur.setHp(10 * 5);
+            joueur.subitDegatsMagiques();
+        }
+        else {
+            console.log("Le sort échoue...");
         }
     };
     return MonstreDifficle;
@@ -155,6 +173,10 @@ do {
     // let monstre = new MonstreFacile(1);
     player1.attack(monstre);
     console.log("Etat du joueur : " + player1.getHp() + " " + player1.getScore());
-    monstre.attack(player1);
+    if (monstre.isAlive()) {
+        monstre.attack(player1);
+    }
+    player1.scoring(monstre);
 } while (player1.isAlive());
-console.log("Le joueur est mort, son score est de  : " + player1.getScore());
+console.log("Le joueur est mort, son score est de : " + player1.getScore()
+    + " il a tué " + player1.getKcFacile() + " monstres faciles et " + player1.getKcDifficile() + " monstres difficiles");

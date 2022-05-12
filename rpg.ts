@@ -1,154 +1,168 @@
 class Joueur {
-    private hp:number = 150;
-    private score:number = 0;
+    private hp: number = 150;
+    private score: number = 0;
+    private kcFacile:number = 0;
+    private kcFDifficile:number = 0;
 
-    constructor() {}
+    constructor() { }
 
-    getHp():number{
+    getHp(): number {
         return this.hp;
     }
 
-    setHp(degats:number){
-        this.hp = this.hp - degats;
+    esquive(): boolean {
+        let de = new De(6);
+        let lanceBouclier = de.lanceDe();
+        console.log("Le joueur tente une esquive")
+        if (lanceBouclier <= 2) {
+            console.log("Le joueur esquive l'attaque !");
+            return true;
+        } else {
+            console.log("Le joueur s'en prend plein la tête !");
+            return false;
+        }
     }
 
-    getScore():number{
+    subitDegatsNormaux() {
+        let degats = 10;
+        if (!this.esquive()) {
+            this.hp = this.hp - degats;
+            // condition positivite
+        }
+    }
+
+    subitDegatsMagiques() {
+        let degats = 10;
+        let multiplicateurMagique = 5;
+        this.hp = this.hp - degats * multiplicateurMagique;
+    }
+
+    getScore(): number {
         return this.score;
     }
 
-    increaseScore(valeurMonstre){
+    getKcFacile():number{
+        return this.kcFacile;
+    }
+
+    getKcDifficile():number{
+        return this.kcFDifficile;
+    }
+
+    increaseScore(valeurMonstre) {
         this.score += valeurMonstre;
     }
 
-    isAlive():boolean{
-        if(this.getHp() >= 0){
+    isAlive(): boolean {
+        if (this.getHp() > 0) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    attack(monstre){
+    attack(monstre: Monstre) {
         let de = new De(6);
-        let lanceJoueur:number = de.lanceDe();
-        console.log("Le joueur fait : "+lanceJoueur);
-        
-        let lanceMonstre:number = de.lanceDe();
-        console.log("Le monstre fait : "+lanceMonstre);
+        let lanceJoueur: number = de.lanceDe();
+        console.log("Le joueur fait : " + lanceJoueur);
 
-        if(lanceJoueur >= lanceMonstre){
+        let lanceMonstre: number = de.lanceDe();
+        console.log("Le monstre fait : " + lanceMonstre);
+
+        if (lanceJoueur >= lanceMonstre) {
             this.increaseScore(monstre.getValeur());
             console.log("Le monstre est vaincu")
-        }else{
+        } else {
             monstre.isDead();
+            //subir degats pour plus d evolutivite
         }
     }
 
-    esquive():boolean{
-        let de = new De(6);
-        let lanceBouclier = de.lanceDe();
-        if(lanceBouclier <= 2){
-            console.log("Le joueur esquive l'attaque !");
-            return true;
+    scoring(monstre){
+        if(monstre.constructor["name"] == "MonstreFacile"){
+            this.kcFacile++;
         }else{
-            console.log("Le joueur s'en prend plein la tête !");
-            return false;
+            this.kcFDifficile++;
         }
     }
 }
 
 abstract class Monstre {
-    valeur:number;
-    status:boolean = true;
-    constructor(valeur:number){
+    valeur: number;
+    status: boolean = true;
+    constructor(valeur: number) {
         this.valeur = valeur
-     }
+    }
 
-    abstract attack(joueur);
-
-    getValeur(){
+    getValeur() {
         return this.valeur;
     }
-    isDead(){
+    isDead() {
         this.status = false;
     }
 
-    isAlive():boolean{
+    isAlive(): boolean {
         return this.status;
+    }
+    attack(joueur: Joueur) {
+        let de = new De(6);
+        let lanceJoueur: number = de.lanceDe();
+        console.log("Le joueur fait : " + lanceJoueur);
+
+        let lanceMonstre: number = de.lanceDe();
+        console.log("Le monstre fait : " + lanceMonstre);
+
+        if (lanceJoueur < lanceMonstre) {
+            joueur.subitDegatsNormaux();
+        }
     }
 }
 
 class MonstreFacile extends Monstre {
-    constructor(valeur:number) {
+    constructor(valeur: number) {
         super(valeur);
-    }
-    
-    attack(joueur){
-        let de = new De(6);
-        let lanceJoueur:number = de.lanceDe();
-        console.log("Le joueur fait : "+lanceJoueur);
-        
-        let lanceMonstre:number = de.lanceDe();
-        console.log("Le monstre fait : "+lanceMonstre);
-
-        if(lanceJoueur <= lanceMonstre){
-            console.log("Le joueur tente une esquive")
-            if (!joueur.esquive()){
-                joueur.setHp(10);
-            }
-        }
     }
 }
 class MonstreDifficle extends Monstre {
-    constructor(valeur:number) {
+    constructor(valeur: number) {
         super(valeur);
     }
 
-    attack(joueur){
-        let de = new De(6);
-        let lanceJoueur:number = de.lanceDe();
-        console.log("Le joueur fait : "+lanceJoueur);
-        
-        let lanceMonstre:number = de.lanceDe();
-        console.log("Le monstre fait : "+lanceMonstre);
-
-        if(lanceJoueur <= lanceMonstre){
-            console.log("Le joueur tente une esquive")
-            if (!joueur.esquive()){
-                joueur.setHp(10);
-            }
-        }
+    attack(joueur: Joueur) {
+        super.attack(joueur);
         console.log("Le monstre tente de lancer un sort");
+        let de = new De(6);
         let lanceMagique = de.lanceDe();
-        if(lanceMagique == 6){
+        if (lanceMagique == 6) {
             console.log("LE SORT REUSSI !!!");
-            
-            joueur.setHp(10*5);
+            joueur.subitDegatsMagiques();
+        } else {
+            console.log("Le sort échoue...");
         }
     }
 }
 
-function rencontreAleatoire():Monstre{
+function rencontreAleatoire(): Monstre {
     let de = new De(2);
-    if(de.lanceDe() == 1){
+    if (de.lanceDe() == 1) {
         let slime = new MonstreFacile(1);
         return slime
-    }else{
+    } else {
         let orc = new MonstreDifficle(2);
         return orc;
     }
 }
 
 class De {
-    nombreFace:number;
-    resultat:number;
+    nombreFace: number;
+    resultat: number;
 
-    constructor(nombreFace:number){
+    constructor(nombreFace: number) {
         this.nombreFace = nombreFace;
     }
 
-    lanceDe():number{
-        return Math.floor(Math.random()*(this.nombreFace+1));
+    lanceDe(): number {
+        return Math.floor(Math.random() * (this.nombreFace + 1));
     }
 }
 
@@ -158,8 +172,14 @@ console.log(player1.getHp());
 do {
     let monstre = rencontreAleatoire();
     // let monstre = new MonstreFacile(1);
-    player1.attack(monstre);
-    console.log("Etat du joueur : "+player1.getHp()+" "+player1.getScore());
-    monstre.attack(player1);
+    
+        player1.attack(monstre);
+        console.log("Etat du joueur : " + player1.getHp() + " " + player1.getScore());
+        if(monstre.isAlive()){ 
+            monstre.attack(player1);
+            }
+        player1.scoring(monstre);
 } while (player1.isAlive());
-console.log("Le joueur est mort, son score est de  : "+player1.getScore());
+
+console.log("Le joueur est mort, son score est de : " + player1.getScore()
++" il a tué "+player1.getKcFacile()+" monstres faciles et "+player1.getKcDifficile()+" monstres difficiles");
